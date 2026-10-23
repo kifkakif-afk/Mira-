@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIRA STORE - RoV Topup & E-sports Store</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Kanit & Orbitron -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        esports: {
+                            bg: '#0a0d14',
+                            card: '#101625',
+                            border: '#1e293b',
+                            accent: '#f59e0b', // Gold
+                            cyan: '#06b6d4',   // Electric Cyan
+                            blue: '#2563eb',   // Deep Blue
+                            darkBlue: '#0f172a'
+                        }
+                    },
+                    fontFamily: {
+                        kanit: ['Kanit', 'sans-serif'],
+                        orbitron: ['Orbitron', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #0a0d14;
+            color: #f3f4f6;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        .glow-gold {
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.25);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.25);
+        }
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .cyan-gradient-text {
+            background: linear-gradient(135deg, #a5f3fc 0%, #06b6d4 50%, #0284c7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass-panel {
+            background: rgba(16, 22, 37, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0d14;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f59e0b;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-black">
+
+    <!-- Top Viewport Control Bar -->
+    <header class="bg-esports-darkBlue/90 border-b border-esports-border sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
+            <!-- Brand Logo -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-esports-cyan to-blue-600 p-0.5 shadow-lg flex items-center justify-center">
+                    <div class="w-full h-full bg-esports-bg rounded-[10px] flex items-center justify-center">
+                        <i class="fa-solid font-orbitron text-amber-400 text-lg font-bold">M</i>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="font-orbitron font-extrabold text-lg tracking-wider text-white flex items-center gap-1.5">
+                        MIRA <span class="gold-gradient-text">STORE</span>
+                        <span class="text-[10px] font-kanit bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/30">RoV TOPUP</span>
+                    </h1>
+                </div>
+            </div>
+
+            <!-- View Switcher Tabs -->
+            <div class="flex items-center bg-esports-bg/80 p-1 rounded-xl border border-esports-border">
+                <button id="tabCustomerBtn" onclick="switchView('customer')" class="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 bg-amber-500 text-black font-semibold shadow-md">
+                    <i class="fa-solid fa-store"></i>
+                    <span>หน้าลูกค้า (Storefront)</span>
+                </button>
+                <button id="tabAdminBtn" onclick="switchView('admin')" class="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-all duration-300">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <span>หลังบ้าน (Admin)</span>
+                    <span id="pendingBadge" class="bg-red-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold hidden">0</span>
+                </button>
+            </div>
+
+            <!-- Realtime Sync Status Indicator -->
+            <div class="flex items-center gap-2 text-xs bg-slate-900/80 px-3 py-1.5 rounded-full border border-slate-800">
+                <span class="relative flex h-2.5 w-2.5">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </span>
+                <span class="text-emerald-400 font-medium">Realtime Sync Active</span>
+                <span class="text-gray-500 hidden sm:inline">| Cross-Tab</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Notification Toast Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-grow">
+
+        <!-- ========================================================================= -->
+        <!-- 1. FRONTEND: CUSTOMER STOREFRONT VIEW -->
+        <!-- ========================================================================= -->
+        <div id="customerView" class="space-y-8 transition-opacity duration-300">
+            <!-- Hero Banner -->
+            <div class="relative rounded-2xl overflow-hidden border border-esports-border bg-gradient-to-r from-esports-card via-slate-900 to-esports-darkBlue p-6 md:p-8">
+                <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -left-10 -top-10 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <div class="relative z-10 max-w-2xl">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold mb-3">
+                        <i class="fa-solid fa-bolt"></i> ระบบเติมคูปองอัตโนมัติ รวดเร็ว ปลอดภัย 100%
+                    </div>
+                    <h2 class="text-2xl md:text-4xl font-extrabold text-white tracking-wide font-orbitron mb-2">
+                        ROV COUPON <span class="gold-gradient-text">TOPUP STORE</span>
+                    </h2>
+                    <p class="text-gray-400 text-sm md:text-base mb-4">
+                        เติมคูปองราคาถูกที่สุด ประหยัด สะดวก ปลอดภัย ด้วยระบบยืนยันตัวตนอัตโนมัติ Realtime Sync 24 ชั่วโมง
+                    </p>
+                </div>
+            </div>
+
+            <!-- TOPUP FORM STEPS CONTAINER -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- LEFT COLUMN: Steps 1 & 2 -->
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <!-- STEP 1: ACCOUNT VERIFICATION -->
+                    <div class="glass-panel rounded-2xl p-5 md:p-6 shadow-xl border border-esports-border relative overflow-hidden">
+                        <div class="flex items-center gap-3 mb-4 border-b border-esports-border/50 pb-3">
+                            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500 text-black font-bold font-orbitron text-sm">1</span>
+                            <div>
+                                <h3 class="text-lg font-bold text-white">ระบุ Open ID บัญชีเกม</h3>
+                                <p class="text-xs text-gray-400">กรอก Open ID ของคุณเพื่อตรวจสอบชื่อตัวละครในเกม</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 mb-2">Open ID (ค้นหาได้ในการตั้งค่าเกม RoV)</label>
+                                <div class="flex gap-2">
+                                    <div class="relative flex-1">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                                            <i class="fa-solid fa-id-card"></i>
+                                        </div>
+                                        <input type="text" id="openIdInput" placeholder="ตัวอย่าง: a1b2c3d4e5f67890..." 
+                                            class="w-full pl-10 pr-4 py-3 bg-esports-bg border border-esports-border rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all font-mono text-sm">
+                                    </div>
+                                    <button onclick="checkPlayerName()" type="button" class="px-5 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-bold rounded-xl transition-all shadow-md flex items-center gap-2 whitespace-nowrap text-sm">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                        <span>ตรวจสอบชื่อ</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Player Verified Card Display -->
+                            <div id="playerCard" class="hidden p-4 rounded-xl bg-esports-darkBlue/80 border border-amber-500/40 animate-fade-in flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-amber-500 to-cyan-500 p-0.5">
+                                        <div class="w-full h-full bg-esports-card rounded-full flex items-center justify-center">
+                                            <i class="fa-solid fa-gamepad text-amber-400 text-lg"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span id="playerInGameName" class="font-bold text-white text-base">---</span>
+                                            <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30">
+                                                <i class="fa-solid fa-circle-check"></i> พบบัญชี
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-amber-400 font-medium" id="playerRankDisplay">Rank: ---</p>
+                                    </div>
+                                </div>
+                                <button onclick="resetPlayerCheck()" class="text-xs text-gray-500 hover:text-gray-300">
+                                    <i class="fa-solid fa-rotate-left"></i> เปลี่ยน
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: SELECT COUPON PACKAGE -->
+                    <div class="glass-panel rounded-2xl p-5 md:p-6 shadow-xl border border-esports-border">
+                        <div class="flex items-center justify-between mb-4 border-b border-esports-border/50 pb-3">
+                            <div class="flex items-center gap-3">
+                                <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500 text-black font-bold font-orbitron text-sm">2</span>
+                                <div>
+                                    <h3 class="text-lg font-bold text-white">เลือกแพ็กเกจคูปอง</h3>
+                                    <p class="text-xs text-gray-400">คลิกเลือกจำนวนคูปองที่ต้องการเติม</p>
+                                </div>
+                            </div>
+                            <div class="text-xs text-amber-400 flex items-center gap-1">
+                                <i class="fa-solid fa-arrows-rotate animate-spin" style="animation-duration: 4s;"></i> Realtime Pricing
+                            </div>
+                        </div>
+
+                        <!-- Coupon Grid (Dynamic Rendered) -->
+                        <div id="couponGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT COLUMN: Step 3 Payment & Checkout -->
+                <div class="space-y-6">
+                    
+                    <!-- STEP 3: PAYMENT & SLIP UPLOAD -->
+                    <div class="glass-panel rounded-2xl p-5 md:p-6 shadow-xl border border-esports-border sticky top-20">
+                        <div class="flex items-center gap-3 mb-4 border-b border-esports-border/50 pb-3">
+                            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500 text-black font-bold font-orbitron text-sm">3</span>
+                            <div>
+                                <h3 class="text-lg font-bold text-white">ชำระเงิน & แนบสลิป</h3>
+                                <p class="text-xs text-gray-400">โอนเงินและแนบหลักฐาน</p>
+                            </div>
+                        </div>
+
+                        <!-- Selected Order Summary -->
+                        <div class="bg-esports-bg/80 rounded-xl p-3.5 border border-esports-border mb-4 space-y-2">
+                            <div class="flex justify-between text-xs text-gray-400">
+                                <span>แพ็กเกจที่เลือก:</span>
+                                <span id="summaryPackageName" class="text-white font-medium">ยังไม่ได้เลือก</span>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-400">
+                                <span>จำนวนคูปอง:</span>
+                                <span id="summaryCoupons" class="text-cyan-400 font-bold">0 คูปอง</span>
+                            </div>
+                            <div class="border-t border-esports-border/50 pt-2 flex justify-between items-center">
+                                <span class="text-sm font-bold text-white">ยอดชำระทั้งหมด:</span>
+                                <span id="summaryTotalPrice" class="text-xl font-orbitron font-bold gold-gradient-text">฿0.00</span>
+                            </div>
+                        </div>
+
+                        <!-- Payment Method Accordion -->
+                        <div class="space-y-3 mb-5">
+                            <p class="text-xs font-semibold text-gray-300">ช่องทางการชำระเงิน:</p>
+                            
+                            <!-- KBank -->
+                            <div class="p-3 bg-esports-bg rounded-xl border border-esports-border hover:border-emerald-500/50 transition-all">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-8 h-8 rounded-lg bg-emerald-700 flex items-center justify-center text-white text-xs font-bold">KBANK</div>
+                                        <div>
+                                            <p class="text-xs font-bold text-white">กสิกรไทย (KBank)</p>
+                                            <p class="text-[11px] font-mono text-emerald-400 select-all">177-878-509-5</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="copyToClipboard('177-878-509-5', 'เลขบัญชีกสิกรไทย')" class="text-xs bg-esports-card hover:bg-slate-700 px-2 py-1 rounded text-gray-300">
+                                        <i class="fa-regular fa-copy"></i>
+                                    </button>
+                                </div>
+                                <p class="text-[10px] text-gray-400 mt-1 pl-10">ชื่อบัญชี: ณัฏฐณิชา หนูเสน</p>
+                            </div>
+
+                            <!-- TrueMoney -->
+                            <div class="p-3 bg-esports-bg rounded-xl border border-esports-border hover:border-orange-500/50 transition-all">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-8 h-8 rounded-lg bg-orange-600 flex items-center justify-center text-white text-xs font-bold">TMN</div>
+                                        <div>
+                                            <p class="text-xs font-bold text-white">TrueMoney Wallet</p>
+                                            <p class="text-[11px] font-mono text-orange-400 select-all">0655932180</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="copyToClipboard('0655932180', 'เบอร์ TrueMoney')" class="text-xs bg-esports-card hover:bg-slate-700 px-2 py-1 rounded text-gray-300">
+                                        <i class="fa-regular fa-copy"></i>
+                                    </button>
+                                </div>
+                                <p class="text-[10px] text-gray-400 mt-1 pl-10">ชื่อบัญชี: ณัฏฐณิชา หนูเสน</p>
+                            </div>
+
+                            <!-- QR PromptPay Demo -->
+                            <div class="p-3 bg-esports-bg rounded-xl border border-esports-border text-center">
+                                <p class="text-xs font-bold text-white mb-1"><i class="fa-solid fa-qrcode text-cyan-400"></i> สแกน QR Code PromptPay</p>
+                                <div class="bg-white p-2 rounded-lg inline-block my-1 shadow-inner">
+                                    <!-- Dynamic Simulated QR Code -->
+                                    <img id="promptpayQr" src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=PROMPTPAY-0655932180" alt="PromptPay QR" class="w-24 h-24 mx-auto">
+                                </div>
+                                <p class="text-[10px] text-gray-400">รองรับทุกแอปพลิเคชันธนาคาร</p>
+                            </div>
+                        </div>
+
+                        <!-- Slip File Upload -->
+                        <div class="space-y-2 mb-5">
+                            <label class="block text-xs font-semibold text-gray-300">แนบหลักฐานการโอนเงิน (สลิป):</label>
+                            <div class="relative border-2 border-dashed border-esports-border hover:border-amber-500/50 rounded-xl p-4 text-center cursor-pointer transition-all bg-esports-bg/50" id="slipDropzone">
+                                <input type="file" id="slipInput" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="previewSlip(event)">
+                                <div id="slipUploadPlaceholder" class="space-y-1">
+                                    <i class="fa-solid fa-cloud-arrow-up text-2xl text-amber-400"></i>
+                                    <p class="text-xs text-gray-300">คลิก หรือ ลากไฟล์สลิปมาวางที่นี่</p>
+                                    <p class="text-[10px] text-gray-500">รองรับไฟล์ PNG, JPG, JPEG</p>
+                                </div>
+                                <div id="slipPreviewContainer" class="hidden flex flex-col items-center">
+                                    <img id="slipImagePreview" class="h-28 object-contain rounded-lg border border-esports-border mb-1" src="" alt="Slip Preview">
+                                    <span class="text-[11px] text-emerald-400 font-medium"><i class="fa-solid fa-circle-check"></i> แนบสลิปเรียบร้อยแล้ว</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Order Button -->
+                        <button onclick="submitOrder()" type="button" class="w-full py-3.5 px-4 bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-600 text-black font-bold rounded-xl shadow-lg hover:shadow-amber-500/20 transition-all font-orbitron tracking-wider text-sm flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>ยืนยันคำสั่งซื้อ</span>
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- 2. BACKEND: ADMIN BACKOFFICE VIEW -->
+        <!-- ========================================================================= -->
+        <div id="adminView" class="hidden space-y-8 transition-opacity duration-300">
+            
+            <!-- Admin Header Stats Banner -->
+            <div class="glass-panel rounded-2xl p-6 border border-esports-border">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-semibold mb-2">
+                            <i class="fa-solid fa-user-shield"></i> MIRA STORE BACKOFFICE CONTROL
+                        </div>
+                        <h2 class="text-2xl font-bold text-white font-orbitron">
+                            ระบบจัดการ <span class="cyan-gradient-text">หลังบ้านแอดมิน</span>
+                        </h2>
+                        <p class="text-xs text-gray-400 mt-1">
+                            การแก้ไขข้อมูลราคาสินค้าที่นี่จะส่งสัญญาณอัปเดตแบบ <strong class="text-amber-400">Real-time Cross-Tab</strong> ไปยังหน้าลูกค้าทันที!
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3 w-full md:w-auto">
+                        <button onclick="openAddModal()" class="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i> เพิ่มแพ็กเกจใหม่
+                        </button>
+                        <button onclick="resetDefaultPackages()" class="px-4 py-2.5 bg-esports-card hover:bg-slate-800 text-gray-300 text-xs font-medium rounded-xl border border-esports-border transition-all">
+                            <i class="fa-solid fa-rotate"></i> คืนค่าเริ่มต้น
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Tabs Navigation -->
+            <div class="flex border-b border-esports-border space-x-6 text-sm font-medium">
+                <button id="adminTabPackagesBtn" onclick="switchAdminSubTab('packages')" class="pb-3 text-amber-400 border-b-2 border-amber-400 font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-boxes-stacked"></i> จัดการแพ็กเกจคูปอง
+                </button>
+                <button id="adminTabOrdersBtn" onclick="switchAdminSubTab('orders')" class="pb-3 text-gray-400 hover:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-list-check"></i> รายการคำสั่งซื้อ (Orders)
+                    <span id="orderBadgeCount" class="bg-amber-500 text-black text-[10px] px-1.5 py-0.2 rounded-full font-bold">0</span>
+                </button>
+            </div>
+
+            <!-- SUB-TAB 1: PACKAGE MANAGEMENT TABLE -->
+            <div id="adminSubTabPackages" class="space-y-4">
+                <div class="glass-panel rounded-2xl border border-esports-border overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-esports-darkBlue/90 text-gray-400 font-orbitron uppercase border-b border-esports-border">
+                                <tr>
+                                    <th class="p-4">รูป / แพ็กเกจ</th>
+                                    <th class="p-4">ชื่อแพ็กเกจ</th>
+                                    <th class="p-4">จำนวนคูปอง</th>
+                                    <th class="p-4">ราคาปัจจุบัน (บาท)</th>
+                                    <th class="p-4 text-center">สถานะการขาย</th>
+                                    <th class="p-4 text-right">การจัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminPackageTable" class="divide-y divide-esports-border/50 text-gray-300">
+                                <!-- Injected via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUB-TAB 2: ORDER MANAGEMENT -->
+            <div id="adminSubTabOrders" class="hidden space-y-4">
+                <div class="glass-panel rounded-2xl border border-esports-border overflow-hidden p-4">
+                    <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-receipt text-amber-400"></i> รายการสั่งซื้อคูปองทั้งหมด
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-esports-darkBlue/90 text-gray-400 uppercase border-b border-esports-border">
+                                <tr>
+                                    <th class="p-3">เวลา / รหัสสั่งซื้อ</th>
+                                    <th class="p-3">Open ID / ตัวละคร</th>
+                                    <th class="p-3">แพ็กเกจ</th>
+                                    <th class="p-3">ยอดชำระ</th>
+                                    <th class="p-3 text-center">หลักฐาน (สลิป)</th>
+                                    <th class="p-3 text-center">สถานะ</th>
+                                    <th class="p-3 text-right">ดำเนินการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminOrdersTable" class="divide-y divide-esports-border/50 text-gray-300">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-esports-darkBlue/80 border-t border-esports-border py-4 mt-8">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-gray-500 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <div>
+                &copy; 2026 <span class="text-amber-400 font-bold">MIRA STORE</span>. All rights reserved. E-sports Dark Theme Topup System.
+            </div>
+            <div class="flex items-center gap-4 text-gray-400">
+                <span><i class="fa-solid fa-shield-halved text-emerald-400"></i> Secure System</span>
+                <span><i class="fa-solid fa-bolt text-amber-400"></i> Real-time Sync</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL: ADD / EDIT PACKAGE -->
+    <div id="packageModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel max-w-md w-full rounded-2xl border border-esports-border p-6 space-y-4 shadow-2xl relative">
+            <div class="flex justify-between items-center border-b border-esports-border pb-3">
+                <h3 id="modalTitle" class="text-base font-bold text-white font-orbitron">เพิ่มแพ็กเกจคูปอง</h3>
+                <button onclick="closePackageModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <form id="packageForm" onsubmit="savePackageForm(event)" class="space-y-3">
+                <input type="hidden" id="modalPkgId">
+                <div>
+                    <label class="block text-xs text-gray-300 mb-1">ชื่อแพ็กเกจ</label>
+                    <input type="text" id="modalPkgName" required placeholder="เช่น 11 คูปอง" class="w-full px-3 py-2 bg-esports-bg border border-esports-border rounded-xl text-white text-xs focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-gray-300 mb-1">จำนวนคูปอง</label>
+                        <input type="number" id="modalPkgCoupons" required min="1" placeholder="11" class="w-full px-3 py-2 bg-esports-bg border border-esports-border rounded-xl text-white text-xs focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-300 mb-1">ราคา (บาท)</label>
+                        <input type="number" step="0.01" id="modalPkgPrice" required min="0" placeholder="9.50" class="w-full px-3 py-2 bg-esports-bg border border-esports-border rounded-xl text-white text-xs focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-300 mb-1">สถานะการวางจำหน่าย</label>
+                    <select id="modalPkgActive" class="w-full px-3 py-2 bg-esports-bg border border-esports-border rounded-xl text-white text-xs focus:outline-none focus:border-amber-500">
+                        <option value="true">เปิดขาย (Active)</option>
+                        <option value="false">ปิดขายชั่วคราว (Disabled)</option>
+                    </select>
+                </div>
+                <div class="pt-3 flex gap-2 justify-end">
+                    <button type="button" onclick="closePackageModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-gray-300 text-xs font-semibold rounded-xl">ยกเลิก</button>
+                    <button type="submit" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs rounded-xl shadow">บันทึกข้อมูล</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: VIEW SLIP FULL IMAGE -->
+    <div id="slipModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden" onclick="closeSlipModal()">
+        <div class="max-w-md w-full bg-esports-card p-3 rounded-2xl border border-esports-border text-center space-y-3" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center px-2">
+                <span class="text-xs font-bold text-white">หลักฐานการโอนเงิน (สลิป)</span>
+                <button onclick="closeSlipModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <img id="modalSlipImg" src="" class="max-h-[70vh] w-auto mx-auto rounded-xl border border-esports-border" alt="Slip Full">
+        </div>
+    </div>
+
+
+    <!-- JAVASCRIPT APPLICATION LOGIC & REALTIME SYNC -->
+    <script>
+        // Default Initial Packages
+        const INITIAL_PACKAGES = [
+            { id: 'pkg_1', name: '11 คูปอง', coupons: 11, price: 9.50, active: true },
+            { id: 'pkg_2', name: '24 คูปอง', coupons: 24, price: 19.00, active: true },
+            { id: 'pkg_3', name: '60 คูปอง', coupons: 60, price: 47.95, active: true },
+            { id: 'pkg_4', name: '110 คูปอง', coupons: 110, price: 86.00, active: true },
+            { id: 'pkg_5', name: '185 คูปอง', coupons: 185, price: 143.00, active: true },
+            { id: 'pkg_6', name: '370 คูปอง', coupons: 370, price: 285.00, active: true },
+            { id: 'pkg_7', name: '620 คูปอง', coupons: 620, price: 474.00, active: true },
+            { id: 'pkg_8', name: '1,240 คูปอง', coupons: 1240, price: 948.00, active: true }
+        ];
+
+        // Simulated Character Names & Ranks for Random Verification
+        const MOCK_CHARACTERS = [
+            { name: '🔥 GOD_FLORENTINO 🔥', rank: 'Conqueror (58 ดาว)' },
+            { name: 'Slayer_Raz_TH', rank: 'Grand Commander' },
+            { name: 'Nakroth_ProPlayer', rank: 'Conqueror (102 ดาว)' },
+            { name: 'Violet_CarryMode', rank: 'Master' },
+            { name: 'Kriknak_Main_99', rank: 'Diamond I' },
+            { name: 'Airi_Ninja_Esports', rank: 'Conqueror (15 ดาว)' }
+        ];
+
+        // State variables
+        let packages = [];
+        let orders = [];
+        let selectedPackageId = null;
+        let verifiedPlayer = null;
+        let uploadedSlipBase64 = null;
+
+        // Initialize BroadcastChannel for Realtime Cross-Tab Communication
+        const realtimeChannel = new BroadcastChannel('mira_store_sync_channel');
+
+        // Application Startup
+        window.addEventListener('DOMContentLoaded', () => {
+            loadPackagesFromStorage();
+            loadOrdersFromStorage();
+            renderCustomerPackages();
+            renderAdminPackages();
+            renderAdminOrders();
+
+            // Set default view to Customer
+            switchView('customer');
+
+            // Listen to BroadcastChannel messages from other tabs
+            realtimeChannel.onmessage = (event) => {
+                handleRealtimeUpdate(event.data);
+            };
+
+            // Fallback storage event listener for cross-tab sync
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'mira_rov_packages') {
+                    packages = JSON.parse(e.newValue || '[]');
+                    renderCustomerPackages();
+                    renderAdminPackages();
+                    showToast('⚡ ข้อมูลราคาและแพ็กเกจมีการอัปเดตแบบ Realtime!', 'info');
+                } else if (e.key === 'mira_rov_orders') {
+                    orders = JSON.parse(e.newValue || '[]');
+                    renderAdminOrders();
+                    updatePendingOrdersBadge();
+                }
+            });
+        });
+
+        // Broadcast changes to other open tabs
+        function broadcastChange(type, payload = {}) {
+            const syncData = { type, payload, timestamp: Date.now() };
+            try {
+                realtimeChannel.postMessage(syncData);
+            } catch (err) {
+                console.log('BroadcastChannel sync error:', err);
+            }
+        }
+
+        // Handle incoming realtime signals
+        function handleRealtimeUpdate(data) {
+            if (data.type === 'PACKAGES_UPDATED') {
+                loadPackagesFromStorage();
+                renderCustomerPackages();
+                renderAdminPackages();
+                showToast('🟢 ราคาแพ็กเกจถูกอัปเดตแบบ Realtime จากแอดมิน!', 'info');
+            } else if (data.type === 'ORDER_CREATED') {
+                loadOrdersFromStorage();
+                renderAdminOrders();
+                updatePendingOrdersBadge();
+                showToast('📥 มีคำสั่งซื้อใหม่เข้ามาในระบบ!', 'success');
+            } else if (data.type === 'ORDER_STATUS_CHANGED') {
+                loadOrdersFromStorage();
+                renderAdminOrders();
+                showToast(`คำสั่งซื้อ #${data.payload.orderId.slice(-6)} เปลี่ยนสถานะเป็น ${data.payload.status}`, 'info');
+            }
+        }
+
+        // --- STORAGE HELPERS ---
+        function loadPackagesFromStorage() {
+            const stored = localStorage.getItem('mira_rov_packages');
+            if (stored) {
+                packages = JSON.parse(stored);
+            } else {
+                packages = [...INITIAL_PACKAGES];
+                savePackagesToStorage(false);
+            }
+        }
+
+        function savePackagesToStorage(notify = true) {
+            localStorage.setItem('mira_rov_packages', JSON.stringify(packages));
+            if (notify) {
+                broadcastChange('PACKAGES_UPDATED');
+            }
+        }
+
+        function loadOrdersFromStorage() {
+            const stored = localStorage.getItem('mira_rov_orders');
+            orders = stored ? JSON.parse(stored) : [];
+            updatePendingOrdersBadge();
+        }
+
+        function saveOrdersToStorage(notify = true) {
+            localStorage.setItem('mira_rov_orders', JSON.stringify(orders));
+            updatePendingOrdersBadge();
+            if (notify) {
+                broadcastChange('ORDER_CREATED');
+            }
+        }
+
+        // --- VIEW SWITCHER (Customer vs Admin) ---
+        function switchView(viewMode) {
+            const customerView = document.getElementById('customerView');
+            const adminView = document.getElementById('adminView');
+            const tabCustomerBtn = document.getElementById('tabCustomerBtn');
+            const tabAdminBtn = document.getElementById('tabAdminBtn');
+
+            if (viewMode === 'customer') {
+                customerView.classList.remove('hidden');
+                adminView.classList.add('hidden');
+
+                tabCustomerBtn.className = "flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 bg-amber-500 text-black font-semibold shadow-md";
+                tabAdminBtn.className = "flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-all duration-300";
+            } else {
+                customerView.classList.add('hidden');
+                adminView.classList.remove('hidden');
+
+                tabAdminBtn.className = "flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 bg-cyan-500 text-black font-semibold shadow-md";
+                tabCustomerBtn.className = "flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-all duration-300";
+            }
+        }
+
+        // Admin Sub-Tab Switcher
+        function switchAdminSubTab(subTab) {
+            const pkgTab = document.getElementById('adminSubTabPackages');
+            const ordersTab = document.getElementById('adminSubTabOrders');
+            const pkgBtn = document.getElementById('adminTabPackagesBtn');
+            const ordersBtn = document.getElementById('adminTabOrdersBtn');
+
+            if (subTab === 'packages') {
+                pkgTab.classList.remove('hidden');
+                ordersTab.classList.add('hidden');
+                pkgBtn.className = "pb-3 text-amber-400 border-b-2 border-amber-400 font-bold flex items-center gap-2";
+                ordersBtn.className = "pb-3 text-gray-400 hover:text-white flex items-center gap-2";
+            } else {
+                pkgTab.classList.add('hidden');
+                ordersTab.classList.remove('hidden');
+                ordersBtn.className = "pb-3 text-cyan-400 border-b-2 border-cyan-400 font-bold flex items-center gap-2";
+                pkgBtn.className = "pb-3 text-gray-400 hover:text-white flex items-center gap-2";
+            }
+        }
+
+        // --- STEP 1: PLAYER CHECK SIMULATOR ---
+        function checkPlayerName() {
+            const openId = document.getElementById('openIdInput').value.trim();
+            if (!openId) {
+                showToast('กรุณากรอก Open ID ของบัญชีเกม RoV ก่อนครับ', 'error');
+                return;
+            }
+
+            // Pick a random mock player character
+            const randomIndex = Math.floor(Math.random() * MOCK_CHARACTERS.length);
+            verifiedPlayer = {
+                openId: openId,
+                name: MOCK_CHARACTERS[randomIndex].name,
+                rank: MOCK_CHARACTERS[randomIndex].rank
+            };
+
+            document.getElementById('playerInGameName').innerText = verifiedPlayer.name;
+            document.getElementById('playerRankDisplay').innerText = `Rank: ${verifiedPlayer.rank}`;
+            document.getElementById('playerCard').classList.remove('hidden');
+            showToast(`ยืนยันตัวตนสำเร็จ: ${verifiedPlayer.name}`, 'success');
+        }
+
+        function resetPlayerCheck() {
+            verifiedPlayer = null;
+            document.getElementById('playerCard').classList.add('hidden');
+            document.getElementById('openIdInput').value = '';
+        }
+
+        // --- STEP 2: CUSTOMER PACKAGES RENDER ---
+        function renderCustomerPackages() {
+            const grid = document.getElementById('couponGrid');
+            grid.innerHTML = '';
+
+            packages.forEach(pkg => {
+                const isSelected = selectedPackageId === pkg.id;
+                const card = document.createElement('div');
+                
+                if (!pkg.active) {
+                    // Disabled Package Style
+                    card.className = "relative rounded-xl p-4 bg-slate-900/40 border border-slate-800 opacity-50 cursor-not-allowed text-center";
+                    card.innerHTML = `
+                        <div class="text-[10px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full inline-block mb-2 font-semibold">ปิดขายชั่วคราว</div>
+                        <p class="font-bold text-gray-400 text-sm">${pkg.name}</p>
+                        <p class="text-xs text-gray-500 mt-1 font-mono">฿${pkg.price.toFixed(2)}</p>
+                    `;
+                } else {
+                    // Active Package Style
+                    card.className = `relative rounded-xl p-4 cursor-pointer transition-all duration-300 text-center border ${
+                        isSelected 
+                        ? 'bg-gradient-to-b from-amber-500/20 to-esports-card border-amber-500 glow-gold scale-[1.02]' 
+                        : 'bg-esports-card hover:bg-slate-800/80 border-esports-border hover:border-amber-500/40'
+                    }`;
+                    card.onclick = () => selectPackage(pkg.id);
+
+                    card.innerHTML = `
+                        ${isSelected ? '<div class="absolute -top-2 -right-2 bg-amber-500 text-black w-6 h-6 rounded-full flex items-center justify-center text-xs shadow-lg"><i class="fa-solid fa-check"></i></div>' : ''}
+                        <div class="w-10 h-10 mx-auto mb-2 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 text-lg">
+                            <i class="fa-solid fa-gem"></i>
+                        </div>
+                        <h4 class="font-bold text-white text-sm">${pkg.name}</h4>
+                        <p class="text-xs text-cyan-400 font-semibold mb-2 font-orbitron">${pkg.coupons.toLocaleString()} คูปอง</p>
+                        <div class="mt-auto pt-2 border-t border-esports-border/50">
+                            <span class="text-base font-extrabold font-orbitron text-amber-400">฿${pkg.price.toFixed(2)}</span>
+                        </div>
+                    `;
+                }
+                grid.appendChild(card);
+            });
+
+            // Re-update summary if selected package price changed via realtime
+            if (selectedPackageId) {
+                const currentSelected = packages.find(p => p.id === selectedPackageId);
+                if (currentSelected) {
+                    updateSummary(currentSelected);
+                }
+            }
+        }
+
+        function selectPackage(id) {
+            const pkg = packages.find(p => p.id === id);
+            if (!pkg || !pkg.active) return;
+
+            selectedPackageId = id;
+            renderCustomerPackages();
+            updateSummary(pkg);
+        }
+
+        function updateSummary(pkg) {
+            document.getElementById('summaryPackageName').innerText = pkg.name;
+            document.getElementById('summaryCoupons').innerText = `${pkg.coupons.toLocaleString()} คูปอง`;
+            document.getElementById('summaryTotalPrice').innerText = `฿${pkg.price.toFixed(2)}`;
+            
+            // Update PromptPay QR Image endpoint preview URL
+            document.getElementById('promptpayQr').src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=PROMPTPAY-0655932180-AMOUNT-${pkg.price}`;
+        }
+
+        // --- STEP 3: SLIP UPLOAD & ORDER SUBMISSION ---
+        function previewSlip(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedSlipBase64 = e.target.result;
+                    document.getElementById('slipImagePreview').src = uploadedSlipBase64;
+                    document.getElementById('slipUploadPlaceholder').classList.add('hidden');
+                    document.getElementById('slipPreviewContainer').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function submitOrder() {
+            if (!verifiedPlayer) {
+                showToast('กรุณากรอก Open ID และกดตรวจสอบชื่อตัวละครใน Step 1 ก่อนครับ', 'error');
+                return;
+            }
+            if (!selectedPackageId) {
+                showToast('กรุณาเลือกแพ็กเกจคูปองที่ต้องการเติมใน Step 2 ก่อนครับ', 'error');
+                return;
+            }
+            if (!uploadedSlipBase64) {
+                showToast('กรุณาแนบไฟล์สลิปหลักฐานการโอนเงินก่อนครับ', 'error');
+                return;
+            }
+
+            const pkg = packages.find(p => p.id === selectedPackageId);
+            const newOrder = {
+                id: 'ORD-' + Date.now(),
+                timestamp: new Date().toLocaleString('th-TH'),
+                openId: verifiedPlayer.openId,
+                playerName: verifiedPlayer.name,
+                playerRank: verifiedPlayer.rank,
+                packageName: pkg.name,
+                coupons: pkg.coupons,
+                price: pkg.price,
+                slipImage: uploadedSlipBase64,
+                status: 'Pending' // Pending, Approved, Rejected
+            };
+
+            orders.unshift(newOrder);
+            saveOrdersToStorage(true);
+
+            // Reset Form
+            resetPlayerCheck();
+            selectedPackageId = null;
+            uploadedSlipBase64 = null;
+            document.getElementById('slipInput').value = '';
+            document.getElementById('slipUploadPlaceholder').classList.remove('hidden');
+            document.getElementById('slipPreviewContainer').classList.add('hidden');
+            document.getElementById('summaryPackageName').innerText = 'ยังไม่ได้เลือก';
+            document.getElementById('summaryCoupons').innerText = '0 คูปอง';
+            document.getElementById('summaryTotalPrice').innerText = '฿0.00';
+            renderCustomerPackages();
+
+            showToast('🎉 แจ้งชำระเงินเรียบร้อยแล้ว! แอดมินกำลังตรวจสอบรายการของคุณ', 'success');
+        }
+
+        // --- BACKOFFICE ADMIN MANAGEMENT ---
+
+        function renderAdminPackages() {
+            const tableBody = document.getElementById('adminPackageTable');
+            tableBody.innerHTML = '';
+
+            packages.forEach(pkg => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-900/50 transition-colors";
+                tr.innerHTML = `
+                    <td class="p-4">
+                        <div class="w-8 h-8 rounded bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-gem"></i>
+                        </div>
+                    </td>
+                    <td class="p-4 font-bold text-white">${pkg.name}</td>
+                    <td class="p-4 text-cyan-400 font-orbitron">${pkg.coupons.toLocaleString()} คูปอง</td>
+                    <td class="p-4 font-orbitron text-amber-400 font-bold">฿${pkg.price.toFixed(2)}</td>
+                    <td class="p-4 text-center">
+                        <button onclick="togglePackageStatus('${pkg.id}')" class="px-2.5 py-1 rounded-full text-[10px] font-bold transition-all ${
+                            pkg.active 
+                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
+                            : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                        }">
+                            ${pkg.active ? '<i class="fa-solid fa-eye"></i> เปิดขาย' : '<i class="fa-solid fa-eye-slash"></i> ปิดขาย'}
+                        </button>
+                    </td>
+                    <td class="p-4 text-right space-x-2">
+                        <button onclick="openEditModal('${pkg.id}')" class="px-2.5 py-1.5 bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 rounded-lg text-xs transition-all">
+                            <i class="fa-solid fa-pen-to-square"></i> แก้ไข
+                        </button>
+                        <button onclick="deletePackage('${pkg.id}')" class="px-2.5 py-1.5 bg-red-600/30 hover:bg-red-600/50 text-red-300 rounded-lg text-xs transition-all">
+                            <i class="fa-solid fa-trash"></i> ลบ
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function togglePackageStatus(id) {
+            const pkg = packages.find(p => p.id === id);
+            if (pkg) {
+                pkg.active = !pkg.active;
+                savePackagesToStorage(true);
+                renderAdminPackages();
+                renderCustomerPackages();
+                showToast(`อัปเดตสถานะแพ็กเกจ ${pkg.name} แล้ว`, 'info');
+            }
+        }
+
+        function deletePackage(id) {
+            if (confirm('คุณแน่ใจหรือไม่ที่จะลบแพ็กเกจนี้? การอัปเดตนี้จะผลไปยังหน้าลูกค้าทันที')) {
+                packages = packages.filter(p => p.id !== id);
+                savePackagesToStorage(true);
+                renderAdminPackages();
+                renderCustomerPackages();
+                showToast('ลบแพ็กเกจเรียบร้อยแล้ว', 'info');
+            }
+        }
+
+        function resetDefaultPackages() {
+            if (confirm('คืนค่าแพ็กเกจเริ่มต้นทั้ง 8 รายการหรือไม่?')) {
+                packages = JSON.parse(JSON.stringify(INITIAL_PACKAGES));
+                savePackagesToStorage(true);
+                renderAdminPackages();
+                renderCustomerPackages();
+                showToast('คืนค่าแพ็กเกจเริ่มต้นเรียบร้อยแล้ว', 'success');
+            }
+        }
+
+        // Package Modal Handlers
+        function openAddModal() {
+            document.getElementById('modalTitle').innerText = 'เพิ่มแพ็กเกจใหม่';
+            document.getElementById('modalPkgId').value = '';
+            document.getElementById('modalPkgName').value = '';
+            document.getElementById('modalPkgCoupons').value = '';
+            document.getElementById('modalPkgPrice').value = '';
+            document.getElementById('modalPkgActive').value = 'true';
+            document.getElementById('packageModal').classList.remove('hidden');
+        }
+
+        function openEditModal(id) {
+            const pkg = packages.find(p => p.id === id);
+            if (!pkg) return;
+
+            document.getElementById('modalTitle').innerText = 'แก้ไขแพ็กเกจ';
+            document.getElementById('modalPkgId').value = pkg.id;
+            document.getElementById('modalPkgName').value = pkg.name;
+            document.getElementById('modalPkgCoupons').value = pkg.coupons;
+            document.getElementById('modalPkgPrice').value = pkg.price;
+            document.getElementById('modalPkgActive').value = pkg.active ? 'true' : 'false';
+            document.getElementById('packageModal').classList.remove('hidden');
+        }
+
+        function closePackageModal() {
+            document.getElementById('packageModal').classList.add('hidden');
+        }
+
+        function savePackageForm(e) {
+            e.preventDefault();
+            const id = document.getElementById('modalPkgId').value;
+            const name = document.getElementById('modalPkgName').value.trim();
+            const coupons = parseInt(document.getElementById('modalPkgCoupons').value);
+            const price = parseFloat(document.getElementById('modalPkgPrice').value);
+            const active = document.getElementById('modalPkgActive').value === 'true';
+
+            if (id) {
+                // Update Existing
+                const pkg = packages.find(p => p.id === id);
+                if (pkg) {
+                    pkg.name = name;
+                    pkg.coupons = coupons;
+                    pkg.price = price;
+                    pkg.active = active;
+                }
+            } else {
+                // Add New
+                const newPkg = {
+                    id: 'pkg_' + Date.now(),
+                    name,
+                    coupons,
+                    price,
+                    active
+                };
+                packages.push(newPkg);
+            }
+
+            savePackagesToStorage(true);
+            renderAdminPackages();
+            renderCustomerPackages();
+            closePackageModal();
+            showToast('บันทึกข้อมูลแพ็กเกจและอัปเดตแบบ Realtime แล้ว!', 'success');
+        }
+
+        // Render Admin Orders
+        function renderAdminOrders() {
+            const tbody = document.getElementById('adminOrdersTable');
+            tbody.innerHTML = '';
+
+            if (orders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center p-6 text-gray-500">ยังไม่มีรายการสั่งซื้อในขณะนี้</td></tr>`;
+                return;
+            }
+
+            orders.forEach(ord => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-900/50 transition-colors";
+
+                let statusBadge = '';
+                if (ord.status === 'Pending') {
+                    statusBadge = `<span class="bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded text-[10px]">รอดำเนินการ</span>`;
+                } else if (ord.status === 'Approved') {
+                    statusBadge = `<span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px]">อนุมัติแล้ว</span>`;
+                } else {
+                    statusBadge = `<span class="bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded text-[10px]">ปฏิเสธ</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td class="p-3">
+                        <p class="font-mono text-[11px] text-gray-400">${ord.id}</p>
+                        <p class="text-[10px] text-gray-500">${ord.timestamp}</p>
+                    </td>
+                    <td class="p-3">
+                        <p class="font-bold text-white">${ord.playerName}</p>
+                        <p class="font-mono text-[10px] text-amber-400">${ord.openId}</p>
+                    </td>
+                    <td class="p-3 font-semibold text-cyan-400">${ord.packageName}</td>
+                    <td class="p-3 font-orbitron text-amber-400 font-bold">฿${ord.price.toFixed(2)}</td>
+                    <td class="p-3 text-center">
+                        <button onclick="viewSlipModal('${ord.slipImage}')" class="px-2 py-1 bg-esports-bg hover:bg-slate-700 border border-esports-border rounded text-[11px] text-gray-300">
+                            <i class="fa-solid fa-image text-amber-400"></i> ดูสลิป
+                        </button>
+                    </td>
+                    <td class="p-3 text-center">${statusBadge}</td>
+                    <td class="p-3 text-right space-x-1">
+                        ${ord.status === 'Pending' ? `
+                            <button onclick="updateOrderStatus('${ord.id}', 'Approved')" class="px-2 py-1 bg-emerald-600/30 hover:bg-emerald-600/60 text-emerald-300 rounded text-[11px]">
+                                อนุมัติ
+                            </button>
+                            <button onclick="updateOrderStatus('${ord.id}', 'Rejected')" class="px-2 py-1 bg-red-600/30 hover:bg-red-600/60 text-red-300 rounded text-[11px]">
+                                ปฏิเสธ
+                            </button>
+                        ` : '<span class="text-gray-500 text-[11px]">เสร็จสิ้น</span>'}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateOrderStatus(orderId, newStatus) {
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                order.status = newStatus;
+                saveOrdersToStorage(false);
+                renderAdminOrders();
+                broadcastChange('ORDER_STATUS_CHANGED', { orderId, status: newStatus });
+                showToast(`อัปเดตคำสั่งซื้อ #${orderId.slice(-6)} เป็น ${newStatus} แล้ว`, 'info');
+            }
+        }
+
+        function updatePendingOrdersBadge() {
+            const pendingCount = orders.filter(o => o.status === 'Pending').length;
+            const badge = document.getElementById('pendingBadge');
+            const countDisplay = document.getElementById('orderBadgeCount');
+            
+            if (pendingCount > 0) {
+                badge.innerText = pendingCount;
+                badge.classList.remove('hidden');
+                countDisplay.innerText = pendingCount;
+            } else {
+                badge.classList.add('hidden');
+                countDisplay.innerText = '0';
+            }
+        }
+
+        function viewSlipModal(imgSrc) {
+            document.getElementById('modalSlipImg').src = imgSrc;
+            document.getElementById('slipModal').classList.remove('hidden');
+        }
+
+        function closeSlipModal() {
+            document.getElementById('slipModal').classList.add('hidden');
+        }
+
+        // --- UTILS ---
+        function copyToClipboard(text, label) {
+            const input = document.createElement('input');
+            input.value = text;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+            showToast(`คัดลอก ${label} (${text}) เรียบร้อยแล้ว`, 'success');
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            let bgClass = 'bg-slate-900 border-amber-500/50 text-amber-300';
+            let icon = '<i class="fa-solid fa-circle-info text-amber-400"></i>';
+
+            if (type === 'success') {
+                bgClass = 'bg-slate-900 border-emerald-500/50 text-emerald-300';
+                icon = '<i class="fa-solid fa-circle-check text-emerald-400"></i>';
+            } else if (type === 'error') {
+                bgClass = 'bg-slate-900 border-red-500/50 text-red-300';
+                icon = '<i class="fa-solid fa-triangle-exclamation text-red-400"></i>';
+            }
+
+            toast.className = `p-3.5 rounded-xl border shadow-xl ${bgClass} backdrop-blur-md flex items-center gap-3 text-xs pointer-events-auto transform transition-all duration-300 translate-y-2 opacity-0`;
+            toast.innerHTML = `${icon} <span class="font-medium flex-1">${message}</span>`;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
